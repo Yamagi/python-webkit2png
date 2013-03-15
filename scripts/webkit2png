@@ -85,15 +85,13 @@ if __name__ == '__main__':
                 + "This is free software, and you are welcome to redistribute " \
                 + "it under the terms of the GNU General Public License v2."
 
-    parser = OptionParser(usage="usage: %prog [options] <URL>",
+    parser = OptionParser(usage="usage: %prog [options] <URL> <FILE>",
                           version="%prog " + VERSION + ", Copyright (c) Roland Tapken",
                           description=description, add_help_option=True)
     parser.add_option("-x", "--xvfb", nargs=2, type="int", dest="xvfb",
                       help="Start an 'xvfb' instance with the given desktop size.", metavar="WIDTH HEIGHT")
     parser.add_option("-g", "--geometry", dest="geometry", nargs=2, default=(0, 0), type="int",
                       help="Geometry of the virtual browser window (0 means 'autodetect') [default: %default].", metavar="WIDTH HEIGHT")
-    parser.add_option("-o", "--output", dest="output",
-                      help="Write output to FILE instead of STDOUT.", metavar="FILE")
     parser.add_option("-f", "--format", dest="format", default="png",
                       help="Output image format [default: %default]", metavar="FORMAT")
     parser.add_option("--scale", dest="scale", nargs=2, type="int",
@@ -126,11 +124,12 @@ if __name__ == '__main__':
 
     # Parse command line arguments and validate them (as far as we can)
     (options,args) = parser.parse_args()
-    if len(args) != 1:
+    if len(args) != 2:
         parser.error("incorrect number of arguments")
     if options.display and options.xvfb:
         parser.error("options -x and -d are mutually exclusive")
     options.url = args[0]
+    options.output = open(args[1], "w")
 
     logging.basicConfig(filename=options.logfile,level=logging.WARN,)
 
@@ -157,12 +156,6 @@ if __name__ == '__main__':
             logger.error("Unable to find '%s'" % newArgs[0])
             print >> sys.stderr, "Error - Unable to find '%s' for -x/--xvfb option" % newArgs[0]
             sys.exit(1)
-
-    # Prepare output ("1" means STDOUT)
-    if options.output is None:
-        options.output = sys.stdout
-    else:
-        options.output = open(options.output, "w")
 
     logger.debug("Version %s, Python %s, Qt %s", VERSION, sys.version, qVersion());
 
